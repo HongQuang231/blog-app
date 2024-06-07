@@ -1,9 +1,10 @@
 export interface iFromData {
   id?: string;
-  title: string;
+  name: string;
   description: string;
-  dataImageVideo: any;
+  dataProject: any;
   tagId: string;
+  updatedDate?: string;
 }
 
 export interface IDataProject {

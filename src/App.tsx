@@ -10,6 +10,8 @@ import DashboardComponent from './layout/admin/Dashboard'
 import SettingHomeComponent from './layout/admin/SettingHome'
 import SettingProjectComponent from './layout/admin/ProjectSetting'
 import TagsComponent from './layout/admin/Tags'
+import ProjectDetailComponent from './layout/ProjectDetail'
+import SettingProjectEditComponent from './layout/admin/ProjectSettingEdit'
 
 export default function App() {
   return (
@@ -17,12 +19,13 @@ export default function App() {
       <Routes>
         <Route path='/' element={<MainPageComponent />} />
         <Route path='project' element={<ProjectComponent />}>
-          <Route path='outstanding' element={<ProjectComponent />} />
           <Route path='INTERIOR' element={<ProjectComponent />} />
           <Route path='EXTERIOR' element={<ProjectComponent />} />
           <Route path='SHOP' element={<ProjectComponent />} />
           <Route path='FURNITURE' element={<ProjectComponent />} />
         </Route>
+        <Route path='project/edit' element={<ProjectComponent />} />
+        <Route path='detail/:id' element={<ProjectDetailComponent />} />
         <Route path='modern' element={<ModernComponent />} />
         <Route path='about' element={<AboutComponent />} />
         <Route path='contact' element={<ContractUsComponent />} />
@@ -31,6 +34,7 @@ export default function App() {
         <Route path='dashboard'>
           <Route path='setting-home' element={<SettingHomeComponent />} />
           <Route path='setting-project' element={<SettingProjectComponent />} />
+          <Route path='setting-project-edit/:id' element={<SettingProjectEditComponent />} />
           <Route path='tags' element={<TagsComponent />} />
         </Route>
       </Routes>

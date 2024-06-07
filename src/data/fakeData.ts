@@ -63,7 +63,7 @@ export const dataMain = [
 
 export const navigation = [
   { name: 'Home', href: '/' },
-  { name: 'Project', href: '/project/outstanding' },
+  { name: 'Project', href: '/project' },
   // { name: 'Modern', href: '/modern' },
   { name: 'About Us', href: '/about' },
   { name: 'Contact Us', href: '/contact' },
@@ -219,7 +219,14 @@ export const dataNavbarDashboard = [
     icon: ""
   },
   {
-    id: 2,
+    id: 3,
+    name: 'Edit màn Project',
+    link: '/project/edit',
+    isSelected: false,
+    icon: ""
+  },
+  {
+    id: 4,
     name: 'Cấu hình tag',
     link: '/dashboard/tags',
     isSelected: false,

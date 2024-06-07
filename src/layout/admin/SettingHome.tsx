@@ -4,6 +4,10 @@ import NavbarComponent from "../../component/Navbar";
 import { IHome } from "../../interface/MainPageInterface";
 import { getHomeImage, putImageHome } from "../../api/homeApi";
 import { useSelector } from "react-redux";
+import { Button, Upload } from "antd";
+import { UploadOutlined } from "@ant-design/icons";
+import { fetchUploadImage } from "../../api/uploadImage";
+import LoadingComponent from "../../component/LoadingComponent";
 
 const dropDownData = [
   {
@@ -52,8 +56,9 @@ const SettingHomeComponent = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [linkImage, setLinkImage] = useState("");
-
+  const [file, setFile] = useState<any>()
   const [listDataHome, setListDataHome] = useState<IHome[]>()
+  const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const accessToken = useSelector((state: any) => state.login.accessToken)
 
@@ -94,28 +99,45 @@ const SettingHomeComponent = () => {
     }
   }
 
+  const handleUpload = async (value: any) => {
+    setIsLoading(true)
+    const formData = new FormData()
+    formData.append("file", value?.target?.files[0])
+    formData.append('upload_preset', 'myrr387r')
+    const response = await fetchUploadImage(formData)
+    if (response) {
+      setLinkImage(response.secure_url)
+    } else {
+      setLinkImage('')
+    }
+    setIsLoading(false);
+  }
+
   return (
     <div>
       <NavbarComponent data={dataNavbarDashboard} />
-      <div className="p-20">
-        <form onSubmit={(e) => onSubmitFrom(e)}>
-          <label htmlFor="countries" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Chọn ảnh số</label>
-          <select value={id} onChange={($event) => handleChangeSelect($event.target.value)} required id="countries" className="mb-6 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            {listDataHome && listDataHome.map((data, index) => <option value={data.id}>{index + 1}</option>)}
-          </select>
-          <div className="mb-6">
-            <label htmlFor="image" className="block mb-2 text-sm font-medium text-gray-900">Tên ảnh</label>
-            <input value={title} onChange={($event) => setTitle($event.target.value)} type="text" id="image" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Tên ảnh" required />
-          </div>
-          <div className="mb-6">
-            <label htmlFor="link" className="block mb-2 text-sm font-medium text-gray-900">Đường dẫn hình ảnh</label>
-            <input value={linkImage} onChange={($event) => setLinkImage($event.target.value)} type="text" id="link" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="https://image..." required />
-          </div>
-          <label htmlFor="message" className="block mb-2 text-sm font-medium text-gray-900">Mô tả</label>
-          <textarea value={description} onChange={($event) => setDescription($event.target.value)} required id="message" rows={4} className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Write your thoughts here..."></textarea>
-          <button type="submit" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 mt-5">Thay đổi</button>
-        </form>
-      </div>
+      <LoadingComponent isLoading={isLoading}>
+        <div className="p-20">
+          <form onSubmit={(e) => onSubmitFrom(e)}>
+            <label htmlFor="countries" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Chọn ảnh số</label>
+            <select value={id} onChange={($event) => handleChangeSelect($event.target.value)} required id="countries" className="mb-6 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+              {listDataHome && listDataHome.map((data, index) => <option value={data.id}>{index + 1}</option>)}
+            </select>
+            <div className="mb-6">
+              <label htmlFor="image" className="block mb-2 text-sm font-medium text-gray-900">Tên ảnh</label>
+              <input value={title} onChange={($event) => setTitle($event.target.value)} type="text" id="image" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Tên ảnh" required />
+            </div>
+            <div className="mb-6">
+              <label htmlFor="link" className="block mb-2 text-sm font-medium text-gray-900">Đường dẫn hình ảnh</label>
+              <input onChange={handleUpload} className="block w-full mb-1 text-xs text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" id="small_size" type="file" />
+              <input disabled value={linkImage} type="text" id="link" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="https://image..." required />
+            </div>
+            <label htmlFor="message" className="block mb-2 text-sm font-medium text-gray-900">Mô tả</label>
+            <textarea value={description} onChange={($event) => setDescription($event.target.value)} required id="message" rows={4} className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Write your thoughts here..."></textarea>
+            <button type="submit" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 mt-5">Thay đổi</button>
+          </form>
+        </div>
+      </LoadingComponent>
     </div>
   )
 }

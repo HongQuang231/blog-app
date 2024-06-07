@@ -5,30 +5,22 @@ import { fetchUploadImage } from "../../api/uploadImage";
 import { IDataProject, iFromData } from "../../interface/ProjectInterface";
 import { getListTags } from "../../api/tagApi";
 import { ITag } from "./Tags";
-import { postProject } from "../../api/projectApi";
+import { getDataProjectById, postProject, putProject } from "../../api/projectApi";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { v4 as uuidv4 } from 'uuid';
+import { useLocation, useNavigate } from "react-router-dom";
 import LoadingComponent from "../../component/LoadingComponent";
-const SettingProjectComponent = () => {
+const SettingProjectEditComponent = () => {
   const accessToken = useSelector((state: any) => state.login.accessToken)
+  const location = useLocation();
+  const navigation = useNavigate();
   const [tag, setTag] = useState<ITag>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [listTags, setListTags] = useState<ITag[]>();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [listImageAndVideo, setListImageAndVideo] = useState<IDataProject[]>([
-    {
-      id: uuidv4(),
-      link: '',
-      type: 'image'
-    },
-    {
-      id: uuidv4(),
-      link: '',
-      type: 'video'
-    }
-  ]);
+  const [isLoading, setIsLoading] = useState(false)
+  const [listImageAndVideo, setListImageAndVideo] = useState<IDataProject[]>([]);
 
   useEffect(() => {
     handleListTags();
@@ -37,16 +29,18 @@ const SettingProjectComponent = () => {
   const onSubmitFrom = async (event: any) => {
     event.preventDefault();
     const dataSubmit: iFromData = {
+      id: location.pathname.split('/')[3],
       name: title,
       description: description,
       dataProject: JSON.stringify(listImageAndVideo),
       tagId: tag!.id
     }
-    const data = await postProject(dataSubmit, accessToken)
+
+    const data = await putProject(dataSubmit, accessToken)
     if (data) {
-      toast.success('Thêm thành công')
+      toast.success('Sửa thành công')
     } else {
-      toast.error('Thêm không thành công')
+      toast.error('Sửa không thành công')
     }
   }
 
@@ -60,6 +54,7 @@ const SettingProjectComponent = () => {
 
   const onChangeInput = async (id: string, value: any) => {
     let valueScrope: any
+
     if (typeof value !== 'string') {
       setIsLoading(true)
       valueScrope = value?.target?.files[0];
@@ -72,7 +67,7 @@ const SettingProjectComponent = () => {
       } else {
         valueScrope = ''
       }
-      setIsLoading(false);
+      setIsLoading(false)
 
     } else {
       valueScrope = value;
@@ -97,7 +92,15 @@ const SettingProjectComponent = () => {
   const handleListTags = () => {
     getListTags().then(tags => {
       setListTags(tags)
-      setTag(tags[0])
+
+      getDataProjectById(location.pathname.split('/')[3]).then((data: iFromData) => {
+        setTitle(data.name)
+        setListImageAndVideo(JSON.parse(data.dataProject))
+        setDescription(data.description)
+
+        const tag = tags.find((tag: any) => tag.id === data.tagId)
+        setTag(tag)
+      })
     })
   }
 
@@ -183,7 +186,7 @@ const SettingProjectComponent = () => {
               </div>
               {listImageAndVideo.filter(data => data.type === "video").map(image => (
                 <div key={image.id} className="flex items-center justify-between gap-10 mb-3">
-                  <input onChange={($event) => onChangeInput(image.id, $event.target.value)} type="text" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="https://video..." required />
+                  <input value={image.link} onChange={($event) => onChangeInput(image.id, $event.target.value)} type="text" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="https://video..." required />
                   <button type="button" onClick={() => handleDelete(image.id)}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="red" className="bi bi-trash" viewBox="0 0 16 16">
                       <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
@@ -197,7 +200,8 @@ const SettingProjectComponent = () => {
 
             <label htmlFor="message" className="block mb-2 text-sm font-medium text-gray-900">Mô tả</label>
             <textarea value={description} onChange={($event) => setDescription($event.target.value)} required id="message" rows={4} className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Write your thoughts here..."></textarea>
-            <button type="submit" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 mt-5">Thêm</button>
+            <button type="submit" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 mt-5">Thay đổi</button>
+            <button style={{ marginLeft: 20 }} onClick={() => navigation('/project/edit')} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 mt-5">Quay lại</button>
           </form>
         </div>
       </LoadingComponent>
@@ -205,4 +209,4 @@ const SettingProjectComponent = () => {
   )
 }
 
-export default SettingProjectComponent;
+export default SettingProjectEditComponent;
